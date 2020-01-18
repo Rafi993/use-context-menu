@@ -1,16 +1,16 @@
 import { useEffect, useCallback, useState } from "react";
 
 const useContextMenu = outerRef => {
-  const [Xpos, setXPos] = useState(0);
-  const [Ypos, setYPos] = useState(0);
+  const [xPos, setXPos] = useState("0px");
+  const [yPos, setYPos] = useState("0px");
   const [menu, showMenu] = useState(false);
 
   const handleContextMenu = useCallback(
     event => {
       event.preventDefault();
       if (outerRef && outerRef.current.contains(event.target)) {
-        setXPos(event.clientX);
-        setYPos(event.clientY);
+        setXPos(`${event.pageX}px`);
+        setYPos(`${event.pageY}px`);
         showMenu(true);
       } else {
         showMenu(false);
@@ -19,14 +19,20 @@ const useContextMenu = outerRef => {
     [showMenu, outerRef, setXPos, setYPos]
   );
 
+  const handleClick = useCallback(() => {
+    showMenu(false);
+  }, [showMenu]);
+
   useEffect(() => {
+    document.addEventListener("click", handleClick);
     document.addEventListener("contextmenu", handleContextMenu);
     return () => {
+      document.addEventListener("click", handleClick);
       document.removeEventListener("contextmenu", handleContextMenu);
     };
   });
 
-  return { Xpos, Ypos, menu };
+  return { xPos, yPos, menu };
 };
 
 export default useContextMenu;
